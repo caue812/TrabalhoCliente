@@ -1,6 +1,7 @@
 let urlAPI = "https://public.franciscosensaulas.com"
 async function consultarClientes() {
-    const urlClientes = `${urlAPI}/api/v1/produtos/clientes/`;
+    const urlClientes = `${urlAPI}/api/v1/trabalho/clientes/`;
+    const tabelaClientes = document.getElementById("tabela-clientes")
 
 
     try {
@@ -17,8 +18,10 @@ async function consultarClientes() {
             console.error("A resposta não é um array de clientes.");
             return;
         }
+        let tbody = tabelaClientes.querySelector("tbody");
+        tbody.innerHTML = "";
 
-        tabelaClientes.innerHTML = "";
+        tbody.innerHTML = "";
 
         clientes.forEach(cliente => {
             const tr = document.createElement("tr");
@@ -32,7 +35,7 @@ async function consultarClientes() {
                     </button>
                 </td>
             `;
-            tabelaClientes.appendChild(tr);
+            tbody.appendChild(tr);
         });
 
         atribuirCliqueBotoesApagar();
@@ -41,3 +44,5 @@ async function consultarClientes() {
         console.error("Erro ao fazer a requisição:", erro);
     }
 }
+
+consultarClientes()
