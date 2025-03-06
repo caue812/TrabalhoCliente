@@ -13,6 +13,7 @@ const mascaraTelefone = {
 };
 const maskTelefone = IMask(campoTelefone, mascaraTelefone);
 
+// Validação de campos
 function validarCampos() {
     let nome = campoNome.value.trim();
     let telefone = campoTelefone.value.trim();
@@ -38,6 +39,7 @@ function validarCampos() {
     return true;
 }
 
+// Função para salvar cliente
 async function salvarCliente(evento) {
     evento.preventDefault();
 
@@ -57,11 +59,11 @@ async function salvarCliente(evento) {
         credito: credito
     };
 
-    const urlParaSalvarCliente = `${urlAPI}/api/v1/produtos/clientes`;
+    const urlParaSalvarCliente = `${urlAPI}/api/v1/trabalho/clientes`;
 
     const resposta = await fetch(urlParaSalvarCliente, {
         method: "POST",
-        headers: {"Content-Type": "application/json"},
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify(dados)
     });
 
@@ -73,13 +75,7 @@ async function salvarCliente(evento) {
     }
 }
 
-document.getElementById("formCliente").addEventListener("submit", function(evento) {
-    evento.preventDefault();
-    salvarCliente(evento);
-});
-
-const botaoSalvar = document.getElementById("btn-salvar");
-botaoSalvar.addEventListener("click", function(evento) {
+document.getElementById("formCliente").addEventListener("submit", function (evento) {
     evento.preventDefault();
     salvarCliente(evento);
 });
