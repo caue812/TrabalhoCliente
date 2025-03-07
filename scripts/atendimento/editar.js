@@ -1,64 +1,61 @@
-document.addEventListener('DOMContentLoaded', async () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const atendimentoId = urlParams.get('id');
+const urlAPI = "https://public.franciscosensaulas.com/api/v1/trabalho/atendimentos";
 
-    const response = await fetch(`/api/v1/trabalho/atendimentos/${atendimentoId}`);
-    const atendimento = await response.json();
+const params = new URLSearchParams(window.location.search);
+const idAtendimento = params.get("id");
 
-    if (!atendimento) {
-        Swal.fire('Erro', 'Atendimento não encontrado!', 'error');
-        return;
+async function carregarAtendimento() {
+    try {
+        const resposta = await fetch(`${urlAPI}/${idAtendimento}`);
+        const atendimento = await resposta.json();
+
+        document.getElementById("campoCliente").value = atendimento.cliente;  
+        document.getElementById("campoTipoAtendimento").value = atendimento.tipoAtendimento;
+        document.getElementById("campoDescricao").value = atendimento.descricao || ""; 
+        document.getElementById("campoAtendente").value = atendimento.atendente;
+        document.getElementById("campoDuracao").value = atendimento.duracaoMinutos;
+    } catch (erro) {
+        console.error("Erro ao carregar atendimento:", erro);
     }
+}
 
-    document.getElementById("campoId").value = atendimento.id;
-    document.getElementById("campoCliente").value = atendimento.cliente;
-    document.getElementById("campoTipoAtendimento").value = atendimento.tipoAtendimento;
-    document.getElementById("campoAtendente").value = atendimento.atendente;
-    document.getElementById("campoDuracao").value = atendimento.duracao;
-    document.getElementById("campoDescricao").value = atendimento.descricao;
+async function editarAtendimento(evento) {
+    evento.preventDefault();
 
-    document.getElementById("form-editar-atendimento").addEventListener("submit", async function (event) {
-        event.preventDefault();
+    const cliente = document.getElementById("campoCliente").value;  
+    const tipoAtendimento = document.getElementById("campoTipoAtendimento").value;
+    const descricao = document.getElementById("campoDescricao").value || ""; 
+    const atendente = document.getElementById("campoAtendente").value;
+    const duracao = document.getElementById("campoDuracao").value;
 
-        const cliente = document.getElementById("campoCliente").value;
-        const tipoAtendimento = document.getElementById("campoTipoAtendimento").value;
-        const atendente = document.getElementById("campoAtendente").value;
-        const duracao = document.getElementById("campoDuracao").value;
-        const descricao = document.getElementById("campoDescricao").value;
+    const dados = {
+        cliente: cliente,
+        tipoAtendimento: tipoAtendimento,
+        descricao: descricao, 
+        atendente: atendente,
+        duracaoMinutos: duracao
+    };
 
-        if (cliente.length < 20 || cliente.length > 30) {
-            Swal.fire('Erro', 'O nome do cliente deve ter entre 20 e 30 caracteres.', 'error');
-            return;
+    try {
+        const resposta = await fetch(`${urlAPI}/${idAtendimento}`, {
+            method: 'PUT',
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(dados)
+        });
+
+        if (resposta.ok) {
+            alert("Atendimento atualizado com sucesso!");
+            window.location.href = "/index.html"; 
+        } else {
+            alert("Erro ao atualizar atendimento.");
         }
+    } catch (erro) {
+        console.error("Erro ao atualizar atendimento:", erro);
+    }
+}
 
-        if (duracao < 0 || duracao > 1440) {
-            Swal.fire('Erro', 'A duração deve ser entre 0 e 1440 minutos.', 'error');
-            return;
-        }
+document.getElementById("formAtendimento").addEventListener("submit", editarAtendimento);
 
-        if (descricao.length < 100 || descricao.length > 150) {
-            Swal.fire('Erro', 'A descrição deve ter entre 100 e 150 caracteres.', 'error');
-            return;
-        }
 
-        try {
-            const response = await fetch(`/api/v1/trabalho/atendimentos/${atendimentoId}`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ cliente, tipoAtendimento, atendente, duracao, descricao })
-            });
-
-            if (response.ok) {
-                Swal.fire('Sucesso', 'Atendimento atualizado com sucesso!', 'success');
-                window.location.href = 'index.html';
-            } else {
-                Swal.fire('Erro', 'Não foi possível atualizar o atendimento.', 'error');
-            }
-        } catch (error) {
-            Swal.fire('Erro', 'Erro ao atualizar atendimento.', 'error');
-        }
-    });
-});
-
+carregarAtendimento();

@@ -1,45 +1,39 @@
-document.getElementById("form-cadastrar-atendimento").addEventListener("submit", async function (event) {
-    event.preventDefault();
+const urlAPI = "https://public.franciscosensaulas.com/api/v1/trabalho/atendimentos";
 
-    const cliente = document.getElementById("campoCliente").value;
+async function criarAtendimento(evento) {
+    evento.preventDefault();
+
+    const cliente = document.getElementById("campoCliente").value;  
     const tipoAtendimento = document.getElementById("campoTipoAtendimento").value;
+    const descricao = document.getElementById("campoDescricao").value || ""; 
     const atendente = document.getElementById("campoAtendente").value;
     const duracao = document.getElementById("campoDuracao").value;
-    const descricao = document.getElementById("campoDescricao").value;
-
-    // Validações
-    if (cliente.length < 20 || cliente.length > 30) {
-        Swal.fire('Erro', 'O nome do cliente deve ter entre 20 e 30 caracteres.', 'error');
-        return;
-    }
-
-    if (duracao < 0 || duracao > 1440) {
-        Swal.fire('Erro', 'A duração deve ser entre 0 e 1440 minutos.', 'error');
-        return;
-    }
-
-    if (descricao.length < 100 || descricao.length > 150) {
-        Swal.fire('Erro', 'A descrição deve ter entre 100 e 150 caracteres.', 'error');
-        return;
-    }
+    const dados = {
+        cliente: cliente,
+        tipoAtendimento: tipoAtendimento,
+        descricao: descricao, 
+        atendente: atendente,
+        duracaoMinutos: duracao
+    };
 
     try {
-        const response = await fetch('/api/v1/trabalho/atendimentos', {
+        const resposta = await fetch(urlAPI, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json',
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify({ cliente, tipoAtendimento, atendente, duracao, descricao })
+            body: JSON.stringify(dados)
         });
 
-        if (response.ok) {
-            Swal.fire('Sucesso', 'Atendimento cadastrado com sucesso!', 'success');
-            document.getElementById("form-cadastrar-atendimento").reset();
+        if (resposta.ok) {
+            alert("Atendimento criado com sucesso!");
+            window.location.href = "/index.html";
         } else {
-            Swal.fire('Erro', 'Não foi possível cadastrar o atendimento.', 'error');
+            alert("Erro ao criar atendimento.");
         }
-    } catch (error) {
-        Swal.fire('Erro', 'Erro ao cadastrar atendimento.', 'error');
+    } catch (erro) {
+        console.error("Erro ao criar atendimento:", erro);
     }
-});
+}
 
+document.getElementById("formAtendimento").addEventListener("submit", criarAtendimento);
