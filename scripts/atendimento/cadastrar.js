@@ -42,3 +42,4 @@ document.getElementById("form-cadastrar-atendimento").addEventListener("submit",
         Swal.fire('Erro', 'Erro ao cadastrar atendimento.', 'error');
     }
 });
+
