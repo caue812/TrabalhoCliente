@@ -13,7 +13,7 @@ const mascaraTelefone = {
 };
 const maskTelefone = IMask(campoTelefone, mascaraTelefone);
 
-// Validação de campos
+
 function validarCampos() {
     let nome = campoNome.value.trim();
     let telefone = campoTelefone.value.trim();
