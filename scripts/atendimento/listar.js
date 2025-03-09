@@ -1,84 +1,94 @@
-
-
 const urlAPI = "https://public.franciscosensaulas.com/api/v1/trabalho/atendimentos";
-
-async function listarAtendimentos() {
-    const tabelaAtendimentos = document.getElementById("tabela-atendimentos").getElementsByTagName("tbody")[0];
-    tabelaAtendimentos.innerHTML = ''; // Limpar a tabela antes de adicionar novos atendimentos
-
+async function consultarAtendimentos() {
     try {
         const resposta = await fetch(urlAPI);
         if (!resposta.ok) {
-            console.error("Erro ao obter os atendimentos");
+            Swal.fire('Erro!', 'Erro ao consultar atendimentos', 'error');
             return;
         }
 
         const atendimentos = await resposta.json();
+        const tbody = document.querySelector("#tabela-atendimentos tbody");
 
-        atendimentos.forEach(atendimento => {
+       
+        tbody.innerHTML = '';
+
+       
+        atendimentos.sort((a, b) => a.id - b.id); 
+
+       
+        atendimentos.forEach((atendimento, index) => {
             const tr = document.createElement("tr");
+
             tr.innerHTML = `
-                <td>${atendimento.id}</td>
+                <td>${index + 1}</td> <!-- Exibe o ID sequencial na tabela -->
                 <td>${atendimento.cliente}</td>
                 <td>${atendimento.tipoAtendimento}</td>
                 <td>${atendimento.atendente}</td>
                 <td>${atendimento.duracaoMinutos}</td>
                 <td>
-                    <button class="btn btn-warning" onclick="editarAtendimento(${atendimento.id})">Editar</button>
-                    <button class="btn btn-danger" onclick="deletarAtendimento(${atendimento.id})">Excluir</button>
+                    <a href="/atendimento/editar_atendimento.html?id=${atendimento.id}" class="btn btn-warning">
+                        <i class="fas fa-edit"></i> Editar
+                    </a>
+                    <button class="btn btn-danger" onclick="excluirAtendimento(${atendimento.id})">
+                        <i class="fas fa-trash"></i> Excluir
+                    </button>
                 </td>
             `;
-            tabelaAtendimentos.appendChild(tr);
+
+            tbody.appendChild(tr);
         });
     } catch (erro) {
-        console.error("Erro ao carregar os atendimentos:", erro);
+        console.error("Erro ao carregar atendimentos:", erro);
+        Swal.fire('Erro!', 'Ocorreu um erro ao carregar os atendimentos', 'error');
     }
 }
 
-async function editarAtendimento(id) {
-    window.location.href = `/atendimentos/editar_atendimento.html?id=${id}`;
-}
 
-async function deletarAtendimento(id) {
-    const confirmar = await Swal.fire({
-        title: 'Você tem certeza?',
-        text: "Você não poderá reverter isso!",
-        icon: 'warning',
-        showCancelButton: true,
-        confirmButtonColor: '#d33',
-        cancelButtonColor: '#3085d6',
-        confirmButtonText: 'Sim, excluir!'
-    });
+async function excluirAtendimento(id) {
+    try {
+    
+        const resposta = await fetch(`${urlAPI}/${id}`);
+        const atendimento = await resposta.json();
 
-    if (confirmar.isConfirmed) {
-        try {
-            const resposta = await fetch(`${urlAPI}/${id}`, {
-                method: 'DELETE',
-            });
+       
+        const confirmarExclusao = await Swal.fire({
+            title: `Tem certeza que deseja excluir o atendimento de ${atendimento.cliente}?`,
+            text: "Esta ação não pode ser desfeita.",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Sim, excluir!',
+            cancelButtonText: 'Cancelar'
+        });
 
-            if (resposta.ok) {
-                Swal.fire(
-                    'Deletado!',
-                    'O atendimento foi excluído com sucesso.',
-                    'success'
-                );
-                listarAtendimentos(); // Recarregar a lista
-            } else {
-                Swal.fire(
-                    'Erro!',
-                    'Não foi possível excluir o atendimento.',
-                    'error'
-                );
-            }
-        } catch (erro) {
-            console.error("Erro ao excluir atendimento:", erro);
+        if (!confirmarExclusao.isConfirmed) return;
+
+       
+        const respostaExclusao = await fetch(`${urlAPI}/${id}`, {
+            method: 'DELETE'
+        });
+
+        if (respostaExclusao.ok) {
+            Swal.fire(
+                'Excluído!',
+                'O atendimento foi excluído com sucesso.',
+                'success'
+            );
+            consultarAtendimentos(); 
+        } else {
             Swal.fire(
                 'Erro!',
-                'Ocorreu um erro ao tentar excluir o atendimento.',
+                'Ocorreu um erro ao excluir o atendimento.',
                 'error'
             );
         }
+    } catch (erro) {
+        console.error("Erro ao excluir atendimento:", erro);
+        Swal.fire('Erro!', 'Ocorreu um erro ao tentar excluir o atendimento', 'error');
     }
 }
 
-listarAtendimentos(); // Carregar a lista ao carregar a página
+
+document.getElementById("consultar-atendimentos").addEventListener("click", consultarAtendimentos);
+
+consultarAtendimentos();
